@@ -16,10 +16,10 @@ const port = 3000;
 
 //listen to the chosen port
 app.listen(port, () => {
-	console.log(`Server is running on port http://localhost:${port}`);
+	console.log(`Server is running on port http://localhost:${port}/lotr/characters`);
 });
 
-// Set up a endpoint (route) - In this case a GET request.
+// Set up an endpoint (route) - In this case, a GET request.
 app.get("/lotr/characters", (req, res) => {
 	// Check if there are query parameters
 	if (Object.keys(req.query).length === 0) {
@@ -41,14 +41,14 @@ app.get("/lotr/characters", (req, res) => {
 	}
 });
 
-// Set up a endpoint (route) - In this case a POST request.
+// Set up an endpoint (route) - In this case, a POST request.
 app.post("/lotr/characters", (req, res) => {
 	// Save the request body as a variable
 	const { firstName, lastName, DOB } = req.body;
 	// Check if the request body contains a first name, last name and DOB
 	if (!firstName || !lastName || !DOB) {
 		res.status(418).send("Please provide a first name, last name and DOB");
-		// If the body contains firstName, lastName and DOB then we POST the new character with a unique ID
+		// If the body contains firstName, lastName and DOB, then we POST the new character with a unique ID
 	} else {
 		const newCharacter = {
 			id: uuidv4(),
@@ -61,7 +61,7 @@ app.post("/lotr/characters", (req, res) => {
 	}
 });
 
-// set up a endpoint (route) - In this case a PUT request.
+// set up an endpoint (route) - In this case, a PUT request.
 app.put("/lotr/characters/:id", (req, res) => {
 	// Save the request body and the id into variables
 	const { firstName, lastName, DOB } = req.body;
@@ -79,7 +79,7 @@ app.put("/lotr/characters/:id", (req, res) => {
 	}
 });
 
-// Set up an endpoint (route) - In this case a PATCH request.
+// Set up an endpoint (route) - In this case, a PATCH request.
 app.patch("/lotr/characters/:id", (req, res) => {
 	// Save the request body and the id into variables
 	const { firstName, lastName, DOB } = req.body;
@@ -104,7 +104,7 @@ app.patch("/lotr/characters/:id", (req, res) => {
 	}
 });
 
-//set up an endpoint (route) - In this case a DELETE request.
+//set up an endpoint (route) - In this case, a DELETE request.
 app.delete("/lotr/characters/:id", (req, res) => {
 	const { id } = req.params;
 	const index = characters.findIndex((character) => character.id === id);
@@ -115,5 +115,3 @@ app.delete("/lotr/characters/:id", (req, res) => {
 		res.status(200).send("Character deleted");
 	}
 });
-
-export default app;
