@@ -117,8 +117,8 @@ app.patch("/lotr/characters/:id", async (req, res) => {
 
 	const updatedCharacter = {};
 
-	if (firstname) updatedCharacter.firstname = firstName;
-	if (lastname) updatedCharacter.lastname = lastName;
+	if (firstname) updatedCharacter.firstname = firstname;
+	if (lastname) updatedCharacter.lastname = lastname;
 	if (dob) updatedCharacter.dob = dob;
 
 	const { data, error } = await supabase
