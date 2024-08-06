@@ -1,54 +1,51 @@
-import express from "express";
 import { v4 as uuidv4 } from "uuid";
-import characters from "./data/characters.json" with { type: "json" };
+import express from "express";
+import { createClient } from "@supabase/supabase-js";
+import dotenv from "dotenv";
 
-// Add a unique ID to each character
-for (const character of characters) {
-	character.id = uuidv4();
-}
+dotenv.config();
 
-// Save the express function as a variable
 const app = express();
-app.use(express.json());
-
-// Save the chosen port as a variable
 const port = 3000;
 
-//listen to the chosen port
+const supabase = createClient(
+	process.env.SUPABASE_URL,
+	process.env.SUPABASE_KEY,
+);
+
+app.use(express.json());
+
 app.listen(port, () => {
-	console.log(`Server is running on port http://localhost:${port}/lotr/characters`);
+	console.log(
+		`Server is running on port http://localhost:${port}/lotr/characters`,
+	);
 });
 
-// Set up an endpoint (route) - In this case, a GET request.
-app.get("/lotr/characters", (req, res) => {
-	// Check if there are query parameters
-	if (Object.keys(req.query).length === 0) {
-		// If there are no query parameters, return all characters
-		res.status(200).send(characters);
+// GET request to fetch characters
+app.get("/lotr/characters", async (req, res) => {
+	const { firstName, lastName, DOB, id } = req.query;
+	let query = supabase.from("characters").select("*");
+
+	if (firstName) query = query.eq("firstName", firstName);
+	if (lastName) query = query.eq("lastName", lastName);
+	if (DOB) query = query.eq("DOB", DOB);
+	if (id) query = query.eq("id", id);
+
+	const { data, error } = await query;
+
+	if (error) {
+		res.status(500).send(error.message);
 	} else {
-		// If there are query parameters, save them as variables
-		const { firstName, lastName, DOB, id } = req.query;
-		// Filter the characters based on the query parameters
-		const filteredCharacters = characters.filter(
-			(character) =>
-				(!firstName || character.firstName === firstName) &&
-				(!lastName || character.lastName === lastName) &&
-				(!DOB || character.DOB === DOB) &&
-				(!id || character.id === id),
-		);
-		// Return the filtered characters
-		res.status(200).send(filteredCharacters);
+		res.status(200).send(data);
 	}
 });
 
-// Set up an endpoint (route) - In this case, a POST request.
-app.post("/lotr/characters", (req, res) => {
-	// Save the request body as a variable
+// POST request to add a new character
+app.post("/lotr/characters", async (req, res) => {
 	const { firstName, lastName, DOB } = req.body;
-	// Check if the request body contains a first name, last name and DOB
+
 	if (!firstName || !lastName || !DOB) {
-		res.status(418).send("Please provide a first name, last name and DOB");
-		// If the body contains firstName, lastName and DOB, then we POST the new character with a unique ID
+		res.status(418).send("Please provide a first name, last name, and DOB");
 	} else {
 		const newCharacter = {
 			id: uuidv4(),
@@ -56,62 +53,82 @@ app.post("/lotr/characters", (req, res) => {
 			lastName,
 			DOB,
 		};
-		characters.push(newCharacter);
-		res.status(201).send(newCharacter);
+
+		const { data, error } = await supabase
+			.from("characters")
+			.insert([newCharacter]);
+
+		if (error) {
+			res.status(500).send(error.message);
+		} else {
+			res.status(201).send(data);
+		}
 	}
 });
 
-// set up an endpoint (route) - In this case, a PUT request.
-app.put("/lotr/characters/:id", (req, res) => {
-	// Save the request body and the id into variables
+// PUT request to update a character
+app.put("/lotr/characters/:id", async (req, res) => {
+	const { id } = req.params;
 	const { firstName, lastName, DOB } = req.body;
-	const { id } = req.params;
-	// Find the character with the id
-	const character = characters.find((character) => character.id === id);
-	// Check if the character exists
-	if (!character) {
-		res.status(404).send("Character does not exist");
+
+	if (!firstName || !lastName || !DOB) {
+		res.status(418).send("Please provide a first name, last name, and DOB");
 	} else {
-		character.firstName = firstName;
-		character.lastName = lastName;
-		character.DOB = DOB;
-		res.status(200).send(character);
+		const updatedCharacter = {
+			id,
+			firstName,
+			lastName,
+			DOB,
+		};
+
+		const { data, error } = await supabase
+			.from("characters")
+			.update(updatedCharacter)
+			.eq("id", id);
+
+		if (error) {
+			res.status(500).send(error.message);
+		} else {
+			res.status(200).send(data);
+		}
 	}
 });
 
-// Set up an endpoint (route) - In this case, a PATCH request.
-app.patch("/lotr/characters/:id", (req, res) => {
-	// Save the request body and the id into variables
+// DELETE request to delete a character
+app.delete("/lotr/characters/:id", async (req, res) => {
+	const { id } = req.params;
+
+	const { data, error } = await supabase
+		.from("characters")
+		.delete()
+		.eq("id", id);
+
+	if (error) {
+		res.status(500).send(error.message);
+	} else {
+		res.status(200).send(data);
+	}
+});
+
+// PATCH request to update specific fields of a character
+app.patch("/lotr/characters/:id", async (req, res) => {
+	const { id } = req.params;
 	const { firstName, lastName, DOB } = req.body;
-	const { id } = req.params;
-	// Find the character with the id
-	const character = characters.find((character) => character.id === id);
-	// Check if the character exists
-	if (!character) {
-		res.status(404).send("Character not found");
-	} else {
-		// Update the character properties if they are provided in the request body
-		if (firstName) {
-			character.firstName = firstName;
-		}
-		if (lastName) {
-			character.lastName = lastName;
-		}
-		if (DOB) {
-			character.DOB = DOB;
-		}
-		res.status(200).send(character);
-	}
-});
 
-//set up an endpoint (route) - In this case, a DELETE request.
-app.delete("/lotr/characters/:id", (req, res) => {
-	const { id } = req.params;
-	const index = characters.findIndex((character) => character.id === id);
-	if (index === -1) {
-		res.status(404).send("Character not found");
+	const updatedCharacter = {};
+
+	if (firstName) updatedCharacter.firstName = firstName;
+	if (lastName) updatedCharacter.lastName = lastName;
+	if (DOB) updatedCharacter.DOB = DOB;
+
+	const { data, error } = await supabase
+		.from("characters")
+		.update(updatedCharacter)
+		.eq("id", id);
+
+	if (error) {
+		res.status(500).send(error.message);
 	} else {
-		characters.splice(index, 1);
-		res.status(200).send("Character deleted");
+		res.status(200).send(data);
 	}
 });
