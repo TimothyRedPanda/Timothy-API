@@ -54,6 +54,20 @@ CREATE TABLE characters (
   dob TEXT
 );
 ```
+## Filling in the data.
+
+If you want to use the Lord of the Rings characters I used -
+
+1) Above SQL Editor in the sidebar you were just using to create the table there is a table Editor. Click this.
+
+2) Select the newly created characters table.
+
+3) You can now enter your own data - but if you want to use the same LOTR Characters I used then press `insert` and then `import data from CSV`.
+
+4) Finally `browse` to the `characters.csv` file in this repo.
+
+Your table should now be all up and running and filled with lovely Lord of the Rings data.
+
 
 ## Running the Server
 
