@@ -23,12 +23,12 @@ app.listen(port, () => {
 
 // GET request to fetch characters
 app.get("/lotr/characters", async (req, res) => {
-	const { firstName, lastName, DOB, id } = req.query;
+	const { firstname, lastname, dob, id } = req.query;
 	let query = supabase.from("characters").select("*");
 
-	if (firstName) query = query.eq("firstName", firstName);
-	if (lastName) query = query.eq("lastName", lastName);
-	if (DOB) query = query.eq("DOB", DOB);
+	if (firstname) query = query.eq("firstname", firstname);
+	if (lastname) query = query.eq("lastname", lastname);
+	if (dob) query = query.eq("dob", dob);
 	if (id) query = query.eq("id", id);
 
 	const { data, error } = await query;
@@ -42,16 +42,16 @@ app.get("/lotr/characters", async (req, res) => {
 
 // POST request to add a new character
 app.post("/lotr/characters", async (req, res) => {
-	const { firstName, lastName, DOB } = req.body;
+	const { firstname, lastname, dob } = req.body;
 
-	if (!firstName || !lastName || !DOB) {
+	if (!firstname || !lastname || !dob) {
 		res.status(418).send("Please provide a first name, last name, and DOB");
 	} else {
 		const newCharacter = {
 			id: uuidv4(),
-			firstName,
-			lastName,
-			DOB,
+			firstname,
+			lastname,
+			dob,
 		};
 
 		const { data, error } = await supabase
@@ -69,16 +69,16 @@ app.post("/lotr/characters", async (req, res) => {
 // PUT request to update a character
 app.put("/lotr/characters/:id", async (req, res) => {
 	const { id } = req.params;
-	const { firstName, lastName, DOB } = req.body;
+	const { firstname, lastname, dob } = req.body;
 
-	if (!firstName || !lastName || !DOB) {
+	if (!firstname || !lastname || !dob) {
 		res.status(418).send("Please provide a first name, last name, and DOB");
 	} else {
 		const updatedCharacter = {
 			id,
-			firstName,
-			lastName,
-			DOB,
+			firstname,
+			lastname,
+			dob,
 		};
 
 		const { data, error } = await supabase
@@ -113,13 +113,13 @@ app.delete("/lotr/characters/:id", async (req, res) => {
 // PATCH request to update specific fields of a character
 app.patch("/lotr/characters/:id", async (req, res) => {
 	const { id } = req.params;
-	const { firstName, lastName, DOB } = req.body;
+	const { firstname, lastname, dob } = req.body;
 
 	const updatedCharacter = {};
 
-	if (firstName) updatedCharacter.firstName = firstName;
-	if (lastName) updatedCharacter.lastName = lastName;
-	if (DOB) updatedCharacter.DOB = DOB;
+	if (firstname) updatedCharacter.firstname = firstName;
+	if (lastname) updatedCharacter.lastname = lastName;
+	if (dob) updatedCharacter.dob = dob;
 
 	const { data, error } = await supabase
 		.from("characters")
